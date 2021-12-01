@@ -1,0 +1,77 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_07d63/fast && /usr/bin/make -f CMakeFiles/cmTC_07d63.dir/build.make CMakeFiles/cmTC_07d63.dir/build
+make[1]: Entering directory '/home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_07d63.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_07d63.dir/src.c.o   -c /home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_07d63
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_07d63.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_07d63.dir/src.c.o  -o cmTC_07d63 
+/usr/bin/ld: CMakeFiles/cmTC_07d63.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_07d63.dir/build.make:87: cmTC_07d63] Error 1
+make[1]: Leaving directory '/home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_07d63/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b15aa/fast && /usr/bin/make -f CMakeFiles/cmTC_b15aa.dir/build.make CMakeFiles/cmTC_b15aa.dir/build
+make[1]: Entering directory '/home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b15aa.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_b15aa.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_b15aa
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b15aa.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_b15aa.dir/CheckFunctionExists.c.o  -o cmTC_b15aa  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_b15aa.dir/build.make:87: cmTC_b15aa] Error 1
+make[1]: Leaving directory '/home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_b15aa/fast] Error 2
+
+
+
+Determining if the function glXGetProcAddressEXT exists failed with the following output:
+Change Dir: /home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_870e3/fast && /usr/bin/make -f CMakeFiles/cmTC_870e3.dir/build.make CMakeFiles/cmTC_870e3.dir/build
+make[1]: Entering directory '/home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_870e3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=glXGetProcAddressEXT   -o CMakeFiles/cmTC_870e3.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_870e3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_870e3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=glXGetProcAddressEXT    -rdynamic CMakeFiles/cmTC_870e3.dir/CheckFunctionExists.c.o  -o cmTC_870e3  /usr/lib/x86_64-linux-gnu/libGL.so 
+/usr/bin/ld: CMakeFiles/cmTC_870e3.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `glXGetProcAddressEXT'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_870e3.dir/build.make:88: cmTC_870e3] Error 1
+make[1]: Leaving directory '/home/ozgesu/Desktop/ÖzgesuÖzenCGLab/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_870e3/fast] Error 2
+
+
+
