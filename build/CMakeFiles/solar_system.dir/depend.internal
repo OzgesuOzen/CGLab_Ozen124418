@@ -121,8 +121,10 @@ CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o
  ../framework/include/application.hpp
  ../framework/include/model.hpp
  ../framework/include/model_loader.hpp
+ ../framework/include/pixel_data.hpp
  ../framework/include/shader_loader.hpp
  ../framework/include/structs.hpp
+ ../framework/include/texture_loader.hpp
  ../framework/include/utils.hpp
  ../framework/include/window_handler.hpp
  /home/ozgesu/Desktop/ÖzgesuÖzenCGLab/application/source/application_solar.cpp

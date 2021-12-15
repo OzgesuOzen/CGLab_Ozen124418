@@ -13,6 +13,8 @@ model.hpp
 ../application/include/model.hpp
 structs.hpp
 ../application/include/structs.hpp
+texture_loader.hpp
+../application/include/texture_loader.hpp
 SceneGraph.hpp
 -
 GeometryNode.hpp
@@ -1020,6 +1022,14 @@ model.hpp
 tiny_obj_loader.h
 ../framework/include/tiny_obj_loader.h
 
+../framework/include/pixel_data.hpp
+vector
+-
+cstdint
+-
+glbinding/gl/enum.h
+-
+
 ../framework/include/shader_loader.hpp
 map
 -
@@ -1032,6 +1042,12 @@ glbinding/gl/enum.h
 map
 -
 glbinding/gl/gl.h
+-
+
+../framework/include/texture_loader.hpp
+pixel_data.hpp
+../framework/include/pixel_data.hpp
+string
 -
 
 ../framework/include/utils.hpp

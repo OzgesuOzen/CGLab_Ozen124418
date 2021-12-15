@@ -4,6 +4,7 @@
 #include "application.hpp"
 #include "model.hpp"
 #include "structs.hpp"
+#include "texture_loader.hpp"
 #include <SceneGraph.hpp>
 #include <GeometryNode.hpp>
 #include <CameraNode.hpp>

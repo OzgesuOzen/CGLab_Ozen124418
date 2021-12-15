@@ -120,8 +120,10 @@ CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../frame
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/application.hpp
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/model.hpp
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/model_loader.hpp
+CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/pixel_data.hpp
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/shader_loader.hpp
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/structs.hpp
+CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/texture_loader.hpp
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/utils.hpp
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../framework/include/window_handler.hpp
 CMakeFiles/solar_system.dir/application/source/application_solar.cpp.o: ../application/source/application_solar.cpp
