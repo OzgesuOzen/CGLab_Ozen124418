@@ -39,11 +39,11 @@ void main() {
   vec4 texture_color = texture(planet_texture, pass_TexCoord);//do not normalize texCoord
   
   //Calculate specular color -> Cs
-  reflection_value = 3.25f; //how shiny the surface
-  vec3 C_s = pow(dot(h_vec , v_vec), 4*reflection_value)* light_color; //specular color
+  reflection_value = 3.0f; //how shiny the surface
+  float C_s = pow(dot(h_vec , v_vec), 4*reflection_value); //specular color
 
   //Calculate diffuse color -> Cd
-  vec3 C_d = max(dot(normalize(pass_Normal), l_vec),0.0)*light_color;  
+  float C_d = max(dot(normalize(pass_Normal), l_vec),0.0);  
 
   //Calculate Blinn Phong
   vec3 blinn_phong = ambient_term + (incoming_light_intensity * (C_d + C_s));

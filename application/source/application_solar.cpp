@@ -33,7 +33,10 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 ApplicationSolar::~ApplicationSolar() {
   glDeleteBuffers(1, &planet_object.vertex_BO);
   glDeleteBuffers(1, &planet_object.element_BO);
+  glDeleteBuffers(1, &quad_object.vertex_BO);
+  glDeleteBuffers(1, &quad_object.element_BO);
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
+  glDeleteVertexArrays(1, &quad_object.vertex_AO);
 }
 
 unsigned int planetIndex;
@@ -53,6 +56,7 @@ void ApplicationSolar::render() const {
     render_planet(planet);
     planetIndex++;
   }     
+  render_frame();
 }
 
 void ApplicationSolar::render_planet(std::shared_ptr<GeometryNode> planet)const{
@@ -104,6 +108,24 @@ void ApplicationSolar::render_planet(std::shared_ptr<GeometryNode> planet)const{
 
   glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
   
+}
+
+void ApplicationSolar::render_frame() const{
+  glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind FBO to set the default framebuffer
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT); 
+
+  glUseProgram(m_shaders.at("framebuffer").handle);
+
+  //bind for accessing
+  //glActiveTexture(GL_TEXTURE0);
+  int loc_screen_texture = glGetUniformLocation(m_shaders.at("framebuffer").handle, "screenTexture");
+  glUniform1i(loc_screen_texture, 0);
+
+  glBindTexture(GL_TEXTURE_2D, fbo.texObj_handle); // color attachment texture
+
+  glDrawArrays(quad_object.draw_mode, 0, quad_object.num_elements); 
+
 }
 
 void ApplicationSolar::uploadView() {
@@ -220,6 +242,89 @@ void ApplicationSolar::create_planet(string const& name, shared_ptr<Node> const&
   planetPointer->setTexture(texObj);
 }
 
+void ApplicationSolar::create_frame(){
+  //https://learnopengl.com/Advanced-OpenGL/Framebuffers
+
+  //create a framebuffer object
+  glGenFramebuffers(1, &fbo.handle); 
+  //bind the framebuffer
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo.handle); 
+  
+  //checks the currently bound framebuffer and returns any of these values found in the specification
+  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
+    std::cout<<"GL_FRAMEBUFFER not completed!!!";
+  }
+
+  //glBindFramebuffer(GL_FRAMEBUFFER,0);
+  //glDeleteFramebuffers(1, &fbo.handle); 
+
+  //create a texture for a framebuffer 
+  glGenTextures(1, &fbo.texObj_handle);//&fbo.texObj.handle
+  glBindTexture(GL_TEXTURE_2D, fbo.texObj_handle);
+    
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//800-> width, 600->height
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+
+  //attach texture to the framebuffer
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo.texObj_handle, 0);
+
+  
+  //create a renderbuffer object 
+  glGenRenderbuffers(1, &fbo.rbo_handle); 
+  //bind the renderbuffer object so all subsequent renderbuffer operations affect the current rbo
+  glBindRenderbuffer(GL_RENDERBUFFER, fbo.rbo_handle);
+  //create a depth and stencil renderbuffer object
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600); //glRenderbufferStorage(GL RENDERBUFFER, format, width,height)
+  
+  //attach the renderbuffer object
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fbo.rbo_handle);
+
+  glBindFramebuffer(GL_FRAMEBUFFER,0);
+}
+
+void ApplicationSolar::create_quads(){
+  //https://riptutorial.com/opengl/example/23675/basics-of-framebuffers
+  float quads[] = {
+//   positions     texture coordinates
+    -1.0f,  1.0f,  0.0f, 1.0f,
+    -1.0f, -1.0f,  0.0f, 0.0f,
+     1.0f, -1.0f,  1.0f, 0.0f,
+
+    -1.0f,  1.0f,  0.0f, 1.0f,
+     1.0f, -1.0f,  1.0f, 0.0f,
+     1.0f,  1.0f,  1.0f, 1.0f
+};
+
+// generate vertex array object
+  glGenVertexArrays(1, &quad_object.vertex_AO);
+  // bind the array for attaching buffers
+  glBindVertexArray(quad_object.vertex_AO);
+
+  // generate generic buffer
+  glGenBuffers(1, &quad_object.vertex_BO);
+  // bind this as an vertex array buffer containing all attributes
+  glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
+  // configure currently bound array buffer
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * sizeof(quads), &quads, GL_STATIC_DRAW);
+
+  // activate first attribute on gpu
+  glEnableVertexAttribArray(0);
+  // first attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, 0);
+  // activate second attribute on gpu
+  glEnableVertexAttribArray(1);
+  // second attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (void*)(2*sizeof(float)));
+  
+  // store type of primitive to draw
+  quad_object.draw_mode = GL_TRIANGLES;
+  // transfer number of indices to model object 
+  quad_object.num_elements = sizeof(quads)/4;
+
+}
+
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
   // store shader program objects in container
@@ -230,6 +335,16 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
   m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
   m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+
+  m_shaders.emplace("framebuffer", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/framebuffer.vert"},
+                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/framebuffer.frag"}}});
+  
+  //Luminance Preserving Grayscale (key 7), Horizontal Mirroring
+  //(key 8), Vertical Mirroring (key 9) and Blur with 3x3 Gaussian Kernel (
+  /*m_shaders.at("framebuffer").u_locs["grayScale"] = 0;
+  m_shaders.at("framebuffer").u_locs["horizontalMirroring"] = 0;
+  m_shaders.at("framebuffer").u_locs["verticalMirroring"] = 0;
+  m_shaders.at("framebuffer").u_locs["gaussianKernel"] = 0;*/
 }
 
 // load models

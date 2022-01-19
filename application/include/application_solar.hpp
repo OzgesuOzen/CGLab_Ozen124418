@@ -36,6 +36,7 @@ class ApplicationSolar : public Application {
   void initializeGeometry();
   void initializeSceneGraph();
   void create_planet(string const& name, shared_ptr<Node> const& parent, float size, float speed, float distance, glm::fvec3 color);
+  void create_frame();
    // update uniform values
   void uploadUniforms();
   // upload projection matrix
@@ -44,9 +45,13 @@ class ApplicationSolar : public Application {
   void uploadView();
 
   void render_planet(shared_ptr<GeometryNode> pl) const;
+  void render_frame() const;
+  void create_quads();
 
   // cpu representation of model
   model_object planet_object;
+  model_object quad_object;
+  frame_object fbo;
   std::shared_ptr<PointLightNode> lightNode;//for sun
   
   // camera transform matrix
