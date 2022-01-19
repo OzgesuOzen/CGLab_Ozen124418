@@ -52,6 +52,8 @@ class ApplicationSolar : public Application {
   model_object planet_object;
   model_object quad_object;
   frame_object fbo;
+  float windowWidth = initial_resolution.x;
+  float windowHeight = initial_resolution.y;
   std::shared_ptr<PointLightNode> lightNode;//for sun
   
   // camera transform matrix

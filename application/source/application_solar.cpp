@@ -28,6 +28,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeSceneGraph();
   initializeGeometry();
   initializeShaderPrograms();
+  create_quads();
+  create_frame();
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -42,8 +44,13 @@ ApplicationSolar::~ApplicationSolar() {
 unsigned int planetIndex;
 
 void ApplicationSolar::render() const {
+    
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo.handle);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+
   glUseProgram(m_shaders.at("planet").handle);
-  
   //get planets
   list<std::shared_ptr<GeometryNode>> planets = sg.getPlanetList();
   //get sun
@@ -111,18 +118,21 @@ void ApplicationSolar::render_planet(std::shared_ptr<GeometryNode> planet)const{
 }
 
 void ApplicationSolar::render_frame() const{
+  //https://riptutorial.com/opengl/example/23675/basics-of-framebuffers
   glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind FBO to set the default framebuffer
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT); 
+  glDisable(GL_DEPTH_TEST);
 
   glUseProgram(m_shaders.at("framebuffer").handle);
 
   //bind for accessing
   //glActiveTexture(GL_TEXTURE0);
   int loc_screen_texture = glGetUniformLocation(m_shaders.at("framebuffer").handle, "screenTexture");
-  glUniform1i(loc_screen_texture, 0);
+  glUniform1i(loc_screen_texture, 0);//fbo.texObj_handle
 
-  glBindTexture(GL_TEXTURE_2D, fbo.texObj_handle); // color attachment texture
+  glBindVertexArray(quad_object.vertex_AO);
+  glBindTexture(GL_TEXTURE_2D, fbo.texObj_handle);
 
   glDrawArrays(quad_object.draw_mode, 0, quad_object.num_elements); 
 
@@ -255,17 +265,16 @@ void ApplicationSolar::create_frame(){
     std::cout<<"GL_FRAMEBUFFER not completed!!!";
   }
 
-  //glBindFramebuffer(GL_FRAMEBUFFER,0);
-  //glDeleteFramebuffers(1, &fbo.handle); 
-
   //create a texture for a framebuffer 
   glGenTextures(1, &fbo.texObj_handle);//&fbo.texObj.handle
   glBindTexture(GL_TEXTURE_2D, fbo.texObj_handle);
     
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//800-> width, 600->height
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//800-> width, 600->height
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   //attach texture to the framebuffer
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo.texObj_handle, 0);
@@ -276,26 +285,24 @@ void ApplicationSolar::create_frame(){
   //bind the renderbuffer object so all subsequent renderbuffer operations affect the current rbo
   glBindRenderbuffer(GL_RENDERBUFFER, fbo.rbo_handle);
   //create a depth and stencil renderbuffer object
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600); //glRenderbufferStorage(GL RENDERBUFFER, format, width,height)
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, windowWidth, windowHeight); //glRenderbufferStorage(GL RENDERBUFFER, format, width,height)
   
   //attach the renderbuffer object
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fbo.rbo_handle);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo.rbo_handle);
 
   glBindFramebuffer(GL_FRAMEBUFFER,0);
+  glBindRenderbuffer(GL_RENDERBUFFER,0);
 }
 
 void ApplicationSolar::create_quads(){
   //https://riptutorial.com/opengl/example/23675/basics-of-framebuffers
-  float quads[] = {
-//   positions     texture coordinates
-    -1.0f,  1.0f,  0.0f, 1.0f,
-    -1.0f, -1.0f,  0.0f, 0.0f,
-     1.0f, -1.0f,  1.0f, 0.0f,
-
-    -1.0f,  1.0f,  0.0f, 1.0f,
-     1.0f, -1.0f,  1.0f, 0.0f,
-     1.0f,  1.0f,  1.0f, 1.0f
-};
+  float quads[] = { -1.0f,  1.0f,   0.0f,  0.0f, 1.0f,
+                    -1.0f,  -1.0f,  0.0f,  0.0f, 0.0f,
+                    1.0f,   -1.0f,  0.0f,  1.0f, 0.0f,
+                    -1.0f,  1.0f,   0.0f,  0.0f, 1.0f,
+                    1.0f,   -1.0f,  0.0f,  1.0f, 0.0f,
+                    1.0f,   1.0f,   0.0f,  1.0f, 1.0f};//dots from slides
+                  //pos                    uv
 
 // generate vertex array object
   glGenVertexArrays(1, &quad_object.vertex_AO);
@@ -312,16 +319,16 @@ void ApplicationSolar::create_quads(){
   // activate first attribute on gpu
   glEnableVertexAttribArray(0);
   // first attribute is 3 floats with no offset & stride
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, 0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*5, 0);
   // activate second attribute on gpu
   glEnableVertexAttribArray(1);
   // second attribute is 3 floats with no offset & stride
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (void*)(2*sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*5, (void*)(3*sizeof(float)));
   
   // store type of primitive to draw
   quad_object.draw_mode = GL_TRIANGLES;
   // transfer number of indices to model object 
-  quad_object.num_elements = sizeof(quads)/4;
+  quad_object.num_elements = sizeof(quads)/5;
 
 }
 
@@ -339,12 +346,6 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("framebuffer", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/framebuffer.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/framebuffer.frag"}}});
   
-  //Luminance Preserving Grayscale (key 7), Horizontal Mirroring
-  //(key 8), Vertical Mirroring (key 9) and Blur with 3x3 Gaussian Kernel (
-  /*m_shaders.at("framebuffer").u_locs["grayScale"] = 0;
-  m_shaders.at("framebuffer").u_locs["horizontalMirroring"] = 0;
-  m_shaders.at("framebuffer").u_locs["verticalMirroring"] = 0;
-  m_shaders.at("framebuffer").u_locs["gaussianKernel"] = 0;*/
 }
 
 // load models
@@ -415,6 +416,12 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
   m_view_projection = utils::calculate_projection_matrix(float(width) / float(height));
   // upload new projection matrix
   uploadProjection();
+  //Format the Framebuffers Attachments in the update projection(), so they are
+  //resized with the window.
+  //NOT SURE! 
+  windowHeight=height;
+  windowWidth=width;
+  create_frame();
 }
 
 

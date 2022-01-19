@@ -29,14 +29,17 @@ struct texture_object {
 };
 
 struct frame_object {
+  //Create a Frame Buffer Object with a texture 
+  //as Color Attachment and a Renderbuffer as 
+  //Depth Attachment.
+  
   // handle of frame buffer object
   GLuint handle = 0;
 
-  // attach texture
-  texture_object texObj;
+  // Color Attachment
   GLuint texObj_handle = 0;
   
-  // for render buffer
+  // Renderbuffer
   GLuint rbo_handle;
 };
 
